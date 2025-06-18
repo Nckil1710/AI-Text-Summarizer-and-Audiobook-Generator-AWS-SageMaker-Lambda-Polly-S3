@@ -106,7 +106,7 @@ This setup provides sufficient resources for running lightweight transformer mod
 - This endpoint is used in your summarizer Lambda function to send raw input text and receive a summarized version. The summarized result is then passed to Amazon Polly for speech synthesis and stored as an audiobook in S3.
   
 ## Step 5: Set Up AWS Lambda Functions 
-### We need 2 Lambda Functions one for Text to Speech and another for text summarization 
+### We need 2 Lambda Functions one for "Text to Speech" and another one for "Text summarization"
 ### 1. Create a New Lambda Function for Text to Speech:
 - Go to the **Lambda** service and create a new function.
 - Name it (e.g., `text-to-speech`).
@@ -158,12 +158,57 @@ This setup provides sufficient resources for running lightweight transformer mod
 <img width="1074" alt="{1FC88D1C-DD17-4B91-9326-8BF41EB4F987}" src="https://github.com/user-attachments/assets/2b07edf1-9f24-4662-8607-369158e215c3" />
 <img width="1119" alt="{7E609E6E-1887-4BDF-BAEE-48B4007CF3EF}" src="https://github.com/user-attachments/assets/689e4943-8a86-45be-875f-348ef5197ac2" />
 - also For the ANY Method change the Integration Timeout to 80000 ms
+
 ![image](https://github.com/user-attachments/assets/29fd297e-76d9-4f98-9184-532e28a464d5)
 - Now Deploy the API
-<img width="467" alt="{D7C97841-9BB9-4DCF-BFB4-812F029CA570}" src="https://github.com/user-attachments/assets/5c78d3ec-4488-49e1-bd57-64456473d999" />
-<img width="778" alt="{0B37073D-5DFF-492A-8FBC-10993D072290}" src="https://github.com/user-attachments/assets/d7d9c06d-5e80-4976-b10b-1fdf7ec4c2c8" />
+![WhatsApp Image 2025-06-18 at 19 25 58_45bc3010](https://github.com/user-attachments/assets/fb1e1dc1-47ab-49f4-a192-3efc86fa5086)
+![WhatsApp Image 2025-06-18 at 19 26 27_937dc701](https://github.com/user-attachments/assets/21f4eab7-1237-4635-8225-826be904611f)
 
 ## Step 6: Modify Lambda Code and Set Environment Variables
+### 1. Modify Lambda Code:
+- Open the Lambda function in the AWS Console.
+- Modify the script.js to include the Invoke URL for the API Gateway .
+- Ensure that your Lambda function is sending the request to the correct API endpoint for text-to-speech conversion.
+  ![image](https://github.com/user-attachments/assets/86eef567-4614-4761-8ad8-ee713656bff6)
+### 2. Set Environment Variables:
+In the Lambda configuration for text-to-speech, add an environment variable:
+- Key: BUCKET_NAME
+- Value: summarized-text-audio
+- ![image](https://github.com/user-attachments/assets/dfd12b45-eba1-4758-b03b-6b76a330cc2b)
+ In the Lambda configuration for summarizer, edit the endpoint name with the sagemaker model.
+![image](https://github.com/user-attachments/assets/a72d601d-82c1-4a4d-b6d5-eb74bf04f502)
+## Step 7: Upload HTML for the Frontend (UI)
+### 1. Create the HTML Interface:
+- Create an index.html file for the UI, allowing users to upload text files for conversion to audio and text summarization.
+- Include an upload button and text display for showing conversion progress.
+- Set up a function to handle file uploads and send requests to the Lambda function via API Gateway.
+//html page
+### 2. Deploy Interface on AWS Amplify:
+- Set up AWS Amplify to deploy your HTML frontend.
+- Connect the project to Amplify and deploy it.
+- Ensure that the frontend is linked to the backend Lambda API for seamless text-to-speech conversion.
+//amplify
+## Step 8: Testing and Verifying the Solution
+### 1. Upload Text File and Convert:
+- Test the full workflow by uploading a text file (e.g., a book) through the UI.
+- Check if the text-to-speech conversion works, and the resulting MP3 file is stored in the S3 bucket.
+  //output in donwloads
+
+## Conclusion
+
+This project showcases a fully serverless text summarization and text-to-speech pipeline using AWS services including SageMaker, Lambda, Polly, S3, and API Gateway. By integrating a Hugging Face summarization model in SageMaker with Lambda and Polly, the system efficiently transforms large text inputs into concise audio summaries. This setup not only automates the summarization process but also enables scalable audiobook generation, making it ideal for content accessibility and productivity applications.
+
+## Contributors
+
+This project was developed and maintained by:
+
+- [R Bharath](https://github.com/bharathr31/)
+- [E NIKHILESWAR REDDY](https://github.com/Nckil1710)
+
+Both contributed equally to the development and implementation of the project.
+
+
+
 
 
 
