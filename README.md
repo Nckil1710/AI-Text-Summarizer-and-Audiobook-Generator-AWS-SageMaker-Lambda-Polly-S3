@@ -182,17 +182,20 @@ In the Lambda configuration for text-to-speech, add an environment variable:
 - Create an index.html file for the UI, allowing users to upload text files for conversion to audio and text summarization.
 - Include an upload button and text display for showing conversion progress.
 - Set up a function to handle file uploads and send requests to the Lambda function via API Gateway.
-//html page
+![image](https://github.com/user-attachments/assets/f3c9937c-237a-4784-9fc4-b1f97f666ce3)
+
 ### 2. Deploy Interface on AWS Amplify:
 - Set up AWS Amplify to deploy your HTML frontend.
 - Connect the project to Amplify and deploy it.
 - Ensure that the frontend is linked to the backend Lambda API for seamless text-to-speech conversion.
-//amplify
+![image](https://github.com/user-attachments/assets/61a6d8e3-0a19-48ca-93ad-26ecafb96421)
+
 ## Step 8: Testing and Verifying the Solution
 ### 1. Upload Text File and Convert:
 - Test the full workflow by uploading a text file (e.g., a book) through the UI.
 - Check if the text-to-speech conversion works, and the resulting MP3 file is stored in the S3 bucket.
-  //output in donwloads
+ ![image](https://github.com/user-attachments/assets/e20de7c8-27bb-4b15-a3d5-d10f4514ee9a)
+
 
 ## Conclusion
 
