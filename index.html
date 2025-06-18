@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Processing</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Text Summarization & TTS</h1>
+        <form id="textForm">
+            <label for="fileInput">Upload a Text File:</label>
+            <input type="file" id="fileInput" accept=".txt">
+
+            <label for="textInput">Or Enter Text:</label>
+            <textarea id="textInput" placeholder="Enter text here..."></textarea>
+
+            <label>
+                <div class="checkp">
+                    <input type="checkbox" id="summarizeCheckbox">
+                    <p>Summarize Text</p>
+                </div>      
+            </label>
+
+            <div id="summarizationOptions" style="display: none;">
+                <label for="maxLength">Max Length:</label>
+                <input type="number" id="maxLength" value="200">
+
+                <label for="minLength">Min Length:</label>
+                <input type="number" id="minLength" value="100">
+            </div>
+
+            <label>
+                <div class="checkp">
+                    <input type="checkbox" id="textToSpeechCheckbox">
+                    <p>Convert to Speech</p>
+                </div>
+                
+            </label>
+
+            <div id="ttsOptions" style="display: none;">
+                <label for="voiceSelect">Select Voice:</label>
+                <select id="voiceSelect">
+                    <option value="Joanna">Joanna</option>
+                    <option value="Matthew">Matthew</option>
+                    <option value="Emma">Emma</option>
+                </select>
+
+                <label for="engineSelect">Select Engine:</label>
+                <select id="engineSelect">
+                    <option value="standard">Standard</option>
+                    <option value="neural">Neural</option>
+                </select>
+            </div>
+
+            <button type="submit">Process</button>
+        </form>
+
+        <div class="output">
+            <h2>Output:</h2>
+            <p id="outputText"></p>
+
+            <audio id="audioPlayer" controls style="display:none;">
+                <source id="audioSource" src="" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+
+            <a id="downloadButton" href="#" download="speech.mp3" style="display:none;">Download Audio</a>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

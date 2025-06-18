@@ -1,0 +1,99 @@
+import boto3
+import json
+import base64
+import re
+import logging
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+def lambda_handler(event, context):
+    sagemaker_runtime = boto3.client("sagemaker-runtime")
+    endpoint_name = "huggingface-pytorch-inference-2025-03-05-10-55-04-530"
+
+    try:
+        # Decode Base64 input if needed
+        body = event.get("body", "")
+        if event.get("isBase64Encoded", False):
+            body = base64.b64decode(body).decode("utf-8")
+        
+        logger.info(f"Received body: {body}")
+
+        # Extract text, max_length, and min_length using regex
+        text_match = re.search(r'Content-Disposition: form-data; name="text"\r\n\r\n(.*?)\r\n', body, re.S)
+        max_length_match = re.search(r'Content-Disposition: form-data; name="max_length"\r\n\r\n(.*?)\r\n', body, re.S)
+        min_length_match = re.search(r'Content-Disposition: form-data; name="min_length"\r\n\r\n(.*?)\r\n', body, re.S)
+
+        if not text_match:
+            logger.error("Text input is missing")
+            return {
+                "statusCode": 400,
+                "body": json.dumps({"error": "Text input is required"}),
+                "isBase64Encoded": False,
+            }
+
+        text_input = text_match.group(1).strip()
+        max_length = int(max_length_match.group(1).strip()) if max_length_match else 200
+        min_length = int(min_length_match.group(1).strip()) if min_length_match else 100
+
+        logger.info(f"Extracted text: {text_input[:100]}...")  # Log only first 100 chars
+        logger.info(f"max_length: {max_length}, min_length: {min_length}")
+
+        if min_length > max_length:
+            logger.error("min_length cannot be greater than max_length")
+            return {
+                "statusCode": 400,
+                "body": json.dumps({"error": "min_length cannot be greater than max_length"}),
+                "isBase64Encoded": False,
+            }
+
+        # Construct payload for SageMaker
+        payload = {
+            "inputs": text_input,
+            "parameters": {
+                "max_length": max_length,
+                "min_length": min_length
+            }
+        }
+
+        # Convert to JSON string
+        payload = json.dumps(payload)
+
+        response = sagemaker_runtime.invoke_endpoint(
+            EndpointName=endpoint_name,
+            ContentType="application/json",
+            Body=payload,
+        )
+
+        result = json.loads(response["Body"].read().decode())
+
+        # Fix response format for frontend
+        summary_text = (
+            result[0]["summary_text"]
+            if isinstance(result, list) and "summary_text" in result[0]
+            else "Summarization failed"
+        )
+
+        return {
+            "statusCode": 200,
+            "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "OPTIONS, POST",
+                "Access-Control-Allow-Headers": "Content-Type",
+            },
+            "body": json.dumps({"summary_text": summary_text}),
+            "isBase64Encoded": False,
+        }
+
+    except Exception as e:
+        logger.error(f"Exception: {str(e)}", exc_info=True)
+        return {
+            "statusCode": 500,
+            "headers": {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "OPTIONS, POST",
+                "Access-Control-Allow-Headers": "Content-Type",
+            },
+            "body": json.dumps({"error": str(e)}),
+            "isBase64Encoded": False,
+        }
