@@ -99,14 +99,71 @@ This setup provides sufficient resources for running lightweight transformer mod
 
 
 - Result Once deployed, SageMaker will provide an Endpoint Name, something like:
-
-    huggingface-pytorch-inference-2025-06-18-12-45-01-123
-  ![image](https://github.com/user-attachments/assets/1a237702-9024-41af-9f19-522bb9351f06)
+ ![image](https://github.com/user-attachments/assets/1a237702-9024-41af-9f19-522bb9351f06)
+    **huggingface-pytorch-inference-2025-06-18-12-45-01-123**
+ 
 
 - This endpoint is used in your summarizer Lambda function to send raw input text and receive a summarized version. The summarized result is then passed to Amazon Polly for speech synthesis and stored as an audiobook in S3.
   
-  
+## Step 5: Set Up AWS Lambda Functions 
+### We need 2 Lambda Functions one for Text to Speech and another for text summarization 
+### 1. Create a New Lambda Function for Text to Speech:
+- Go to the **Lambda** service and create a new function.
+- Name it (e.g., `text-to-speech`).
+- Choose **Python 3.13** as the runtime.
+- Set the execution role to `polly-s3-lambda-role`.
+  <img width="936" alt="{7DE25479-60F5-46B3-AA97-93F4FA7061E1}" src="https://github.com/user-attachments/assets/c35fbd08-232a-48de-a749-9fdf0f363b9d" />
 
+  ![Screenshot 2024-11-19 120417](https://github.com/user-attachments/assets/37dfadb2-9911-4abc-8493-33fd1135f707)
+  
+### 2. Configure Lambda Function Trigger:
+- Add a new **API Gateway** trigger to the Lambda function.
+- Select **REST API** and configure the API for your function.
+- Add binary media types: `*/*`, `audio/mpeg`, `text/plain`.
+- MAKE SURE U ADD ALL THE BINARY MEDIA TYPES
+    ![Screenshot 2024-11-19 120547](https://github.com/user-attachments/assets/38adb414-2456-4fe4-8f3b-e210b41121ef)
+   ![Screenshot 2024-11-19 120555](https://github.com/user-attachments/assets/35a0ade0-970d-4488-8112-fe6ef83dac91)
+- Click Create Trigger and then click on API to redirect to REST API
+<img width="1280" alt="{23B85294-B936-447B-A387-4FC72286E1CD}" src="https://github.com/user-attachments/assets/76764fb6-5a4b-42f3-ab3a-20286beffd27" />
+- Go to Resources and in text-to-speech enable **CORS** for cross-origin requests.
+  <img width="1253" alt="{58D414F7-7464-4018-BFF9-9C8AE474FF50}" src="https://github.com/user-attachments/assets/5a5be7bb-b0e8-4535-b565-098addc4c991" />
+
+### 3. Deploy the API:
+
+- Go to Integration Request in Resources and click on edit to change the Integration timeout to 80000 ms .
+
+  <img width="1106" alt="{C2D90994-91AD-4221-A6E8-1AC586FA5D7A}" src="https://github.com/user-attachments/assets/8cf31b99-7fb7-48d5-8a4f-788ea27defd0" />
+![image](https://github.com/user-attachments/assets/068d0c8e-43fa-45cb-be65-9b7c13b19072)
+ ### `Note`
+- By default Integration timeout limit is set to 29000 ms we need to increase the integration timeout limit by using Service Quotas
+- Go to API Gateway Section
+![image](https://github.com/user-attachments/assets/e17ef3bf-a5dc-4f86-bc2c-485f2c149b0f)
+- Search for Timeout and select `Maximum integration timeout in milliseconds` and then click request increase at account level
+- change the limit to 90000 ms
+  ![image](https://github.com/user-attachments/assets/937a07bd-5ebe-4d07-854c-f5cf8a2065f5)
+  ![image](https://github.com/user-attachments/assets/53c2937e-2b14-44a9-8050-f6ea9f51ea6c)
+- After configuring the API Gateway, deploy it.
+
+  ![Screenshot 2024-11-19 121035](https://github.com/user-attachments/assets/c02aec22-7d35-40dd-9066-6e9077af9b52)
+- Copy the **Invoke URL** for later use in Lambda.
+![Screenshot 2024-11-19 121104](https://github.com/user-attachments/assets/b43f0e31-9097-4640-afd9-1940291c1474)
+
+## 4. Create a New Lambda Function for Text Summarization
+- Similar to Steps 1 - 3 we do the same to create `text-summarizer` lambda function
+  ![image](https://github.com/user-attachments/assets/13c8fb25-775e-4efe-969c-58eada719ab7)
+- Now create a Trigger
+![Screenshot 2024-11-19 120547](https://github.com/user-attachments/assets/38adb414-2456-4fe4-8f3b-e210b41121ef)
+![image](https://github.com/user-attachments/assets/a68dded4-7fe6-4676-a142-bef4f40a7e76)
+- Now go to resources and enable **Cors**
+<img width="1074" alt="{1FC88D1C-DD17-4B91-9326-8BF41EB4F987}" src="https://github.com/user-attachments/assets/2b07edf1-9f24-4662-8607-369158e215c3" />
+<img width="1119" alt="{7E609E6E-1887-4BDF-BAEE-48B4007CF3EF}" src="https://github.com/user-attachments/assets/689e4943-8a86-45be-875f-348ef5197ac2" />
+- also For the ANY Method change the Integration Timeout to 80000 ms
+![image](https://github.com/user-attachments/assets/29fd297e-76d9-4f98-9184-532e28a464d5)
+- Now Deploy the API
+<img width="467" alt="{D7C97841-9BB9-4DCF-BFB4-812F029CA570}" src="https://github.com/user-attachments/assets/5c78d3ec-4488-49e1-bd57-64456473d999" />
+<img width="778" alt="{0B37073D-5DFF-492A-8FBC-10993D072290}" src="https://github.com/user-attachments/assets/d7d9c06d-5e80-4976-b10b-1fdf7ec4c2c8" />
+
+## Step 6: Modify Lambda Code and Set Environment Variables
 
 
 
